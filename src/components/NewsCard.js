@@ -57,6 +57,7 @@ const [showComments, setShowComments] =
 const [comments, setComments] =
   useState([]);
 
+
 const [commentText, setCommentText] =
   useState("");
 
@@ -74,7 +75,7 @@ const [commentText, setCommentText] =
     news.is_liked
   );
 
-  const bookmarkedPosts = JSON.parse(
+   const bookmarkedPosts = JSON.parse(
     localStorage.getItem("bookmarkedPosts") || "[]"
   );
 
@@ -135,35 +136,37 @@ const handleLike = async () => {
 
  const handleBookmark = async () => {
   try {
-    console.log(
-      "BOOKMARK NEWS ID:",
-      news.news_id
+    let bookmarkedPosts = JSON.parse(
+      localStorage.getItem("bookmarkedPosts") || "[]"
     );
 
     if (bookmarked) {
-      const response =
-        await deleteBookmark(
-          news.news_id
-        );
+      await deleteBookmark(news.news_id);
 
-      console.log(response);
+      bookmarkedPosts = bookmarkedPosts.filter(
+        (id) => id !== news.news_id
+      );
+
+      localStorage.setItem(
+        "bookmarkedPosts",
+        JSON.stringify(bookmarkedPosts)
+      );
 
       setBookmarked(false);
     } else {
-      const response =
-        await saveBookmark(
-          news.news_id
-        );
+      await saveBookmark(news.news_id);
 
-      console.log(response);
+      bookmarkedPosts.push(news.news_id);
+
+      localStorage.setItem(
+        "bookmarkedPosts",
+        JSON.stringify(bookmarkedPosts)
+      );
 
       setBookmarked(true);
     }
   } catch (error) {
-    console.log(
-      "BOOKMARK ERROR:",
-      error?.response?.data
-    );
+    console.log(error);
   }
 };
 
@@ -225,42 +228,31 @@ const handleLike = async () => {
   // SHARE
   // ====================
 
- const handleShare =
-  async () => {
-    try {
-      const response =
-        await sharePost(
-          news.news_id
-        );
+ const handleShare = async () => {
+  try {
+    const response = await sharePost(news.news_id);
 
-      setShares(
-        response.data
-          .share_count
-      );
+    console.log(response);
 
-      if (
-        navigator.share
-      ) {
-        await navigator.share(
-          {
-            title:
-              news.title,
-            text:
-              news.summary,
-            url:
-              window.location
-                .href,
-          }
-        );
-      }
-    } catch (error) {
-      console.log(error);
+    if (response.success) {
+      setShares(response.data.share_count);
     }
-  };
+
+    if (navigator.share) {
+      await navigator.share({
+        title: response.data.title,
+        text: news.summary,
+        url: window.location.href,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
 
   return (
     <>
-      <div className="bg-white rounded-3xl shadow-md overflow-hidden mb-5 border">
+      <div className="bg-white rounded-3xl shadow-md overflow-hidden mb-5">
 
         {/* IMAGE */}
 
@@ -363,16 +355,10 @@ const handleLike = async () => {
 
              {/* BOOKMARK */}
 
-<button
-  onClick={handleBookmark}
->
+<button onClick={handleBookmark}>
   <Bookmark
     size={22}
-    fill={
-      bookmarked
-        ? "#f97316"
-        : "none"
-    }
+    fill={bookmarked ? "#f97316" : "none"}
     className={
       bookmarked
         ? "text-orange-500"
@@ -409,7 +395,7 @@ const handleLike = async () => {
 {/* COMMENTS INSIDE CARD */}
 
 {showComments && (
-  <div className="mt-4 border-t pt-4">
+  <div className="mt-4 pt-4">
 
     <h3 className="font-semibold text-sm mb-3">
       Comments

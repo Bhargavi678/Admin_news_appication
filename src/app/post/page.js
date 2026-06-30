@@ -333,49 +333,60 @@ export default function PostPage() {
           onChange={handleChange}
           className="w-full border p-4 rounded-xl"
         />
+<div>
+  <label className="block mb-2 font-medium">
+    Upload Thumbnail
+  </label>
 
-        <input
-          name="thumbnail_url"
-          placeholder="Thumbnail URL"
-          value={
-            formData.thumbnail_url
-          }
-          onChange={handleChange}
-          className="w-full border p-4 rounded-xl"
-        />
+  <input
+    type="file"
+    accept="image/*"
+    onChange={(e) =>
+      setFormData((prev) => ({
+        ...prev,
+        thumbnail_url: e.target.files[0],
+      }))
+    }
+    className="w-full border p-3 rounded-xl"
+  />
+</div>
 
-        <input
-          name="video_url"
-          placeholder="Video URL"
-          value={formData.video_url}
-          onChange={handleChange}
-          className="w-full border p-4 rounded-xl"
-        />
+<div>
+  <label className="block mb-2 font-medium">
+    Upload Video
+  </label>
 
-        <label className="flex items-center gap-3">
-          <input
-            type="checkbox"
-            name="is_breaking"
-            checked={
-              formData.is_breaking
-            }
-            onChange={
-              handleChange
-            }
-          />
+  <input
+    type="file"
+    accept="video/*"
+    onChange={(e) =>
+      setFormData((prev) => ({
+        ...prev,
+        video_url: e.target.files[0],
+      }))
+    }
+    className="w-full border p-3 rounded-xl"
+  />
+</div>
 
-          Breaking News
-        </label>
+<label className="flex items-center gap-3">
+  <input
+    type="checkbox"
+    name="is_breaking"
+    checked={formData.is_breaking}
+    onChange={handleChange}
+  />
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-orange-500 text-white py-4 rounded-xl font-semibold"
-        >
-          {loading
-            ? "Publishing..."
-            : "Create & Publish News"}
-        </button>
+  Breaking News
+</label>
+
+<button
+  type="submit"
+  disabled={loading}
+  className="w-full bg-orange-500 text-white py-4 rounded-xl font-semibold"
+>
+  {loading ? "Publishing..." : "Create & Publish News"}
+</button>
 
       </form>
 
