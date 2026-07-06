@@ -230,20 +230,33 @@ const handleLike = async () => {
 
  const handleShare = async () => {
   try {
+    // Call backend to update share count
     const response = await sharePost(news.news_id);
 
-    console.log(response);
+    console.log("Share API Response:", response);
 
-    if (response.success) {
-      setShares(response.data.share_count);
+    if (!response.success) {
+      return;
     }
 
+    // Update share count
+    setShares(response.data.share_count);
+
+    const shareUrl = response.data.share_url;
+    const title = response.data.title;
+    const summary = response.data.summary;
+
+    // Open native share dialog
     if (navigator.share) {
       await navigator.share({
-        title: response.data.title,
-        text: news.summary,
-        url: window.location.href,
+        title: title,
+        text: summary,
+        url: shareUrl,
       });
+    } else {
+      // Fallback: copy link
+      await navigator.clipboard.writeText(shareUrl);
+      alert("Share link copied successfully!");
     }
   } catch (error) {
     console.log(error);
@@ -252,11 +265,22 @@ const handleLike = async () => {
 
   return (
     <>
-      <div className="bg-white rounded-3xl shadow-md overflow-hidden mb-5">
+      <div
+  className="
+    h-full
+    w-full
+    bg-white
+    overflow-hidden
+    flex
+    flex-col
+    rounded-none
+    shadow-none
+  "
+>
 
         {/* IMAGE */}
 
-        <div className="relative h-56 w-full">
+        <div className="relative h-64 md:h-72 w-full">
 
         <img
   src={news.thumbnail_url}
@@ -277,24 +301,21 @@ const handleLike = async () => {
         </div>
 
         {/* CONTENT */}
+        <div className="flex flex-col px-4 py-3">
+        
 
-        <div className="p-4">
-
-          <h2 className="text-xl font-bold text-gray-900 line-clamp-2">
-
+          <h2 className="text-2xl font-bold text-gray-900 leading-snug line-clamp-3">
             {news.title}
 
           </h2>
 
-          <p className="text-gray-600 mt-3 line-clamp-3">
+          <p className="text-gray-600 mt-3 text-base leading-7">
+  {news.summary}
+</p>
 
-            {news.summary}
+          <p className="text-sm text-gray-500 mt-3">
 
-          </p>
-
-          <p className="text-sm text-gray-400 mt-3">
-
-            📍 {news.city},
+             {news.city},
             {" "}
             {news.state}
 
@@ -302,7 +323,7 @@ const handleLike = async () => {
 
           {/* ACTIONS */}
 
-          <div className="flex justify-between items-center mt-5">
+          <div className="flex justify-between items-center mt-4 pt-3 border-t">
 
             <div className="flex gap-5">
 
@@ -388,21 +409,21 @@ const handleLike = async () => {
 
           </div>
 
-         <p className="text-xs text-gray-400 mt-4">
+         <p className="text-xs text-gray-400 mt-3">
   {news.published_at}
 </p>
 
 {/* COMMENTS INSIDE CARD */}
 
 {showComments && (
-  <div className="mt-4 pt-4">
+  <div className="mt-3 border-t pt-3">
 
     <h3 className="font-semibold text-sm mb-3">
       Comments
     </h3>
 
     {/* ONLY 2 COMMENTS VISIBLE */}
-    <div className="max-h-32 overflow-y-auto space-y-2">
+    <div className="max-h-36 overflow-y-auto no-scrollbar space-y-2">
 
       {comments.length === 0 ? (
         <p className="text-gray-500 text-sm">

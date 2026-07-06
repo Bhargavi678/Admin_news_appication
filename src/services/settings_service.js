@@ -18,19 +18,26 @@ export const updateLocation =
     return response.data;
   };
 
-export const updateLanguage =
-  async (language) => {
-    const response =
-      await axiosInstance.put(
-        API_ROUTES.AUTH.LANGUAGE,
-        {
-          preferred_language:
-            language,
-        }
-      );
+export const updateLanguage = async (language) => {
+  try {
+    console.log("Sending Language:", language);
+
+    const response = await axiosInstance.put(
+      API_ROUTES.AUTH.LANGUAGE,
+      {
+        preferred_language: language,
+      }
+    );
+
+    console.log("Response:", response.data);
 
     return response.data;
-  };
+  } catch (error) {
+  console.log("Status:", error.response?.status);
+  console.log("Full Response:", JSON.stringify(error.response?.data, null, 2));
+  throw error;
+}
+};
 
   export const searchNews = async (
   keyword

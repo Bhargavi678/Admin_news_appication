@@ -88,32 +88,25 @@ export default function ProfilePage() {
     }
   };
 
-  const handleLanguageChange =
-    async () => {
-      try {
-        const newLanguage =
-          language === "en"
-            ? "te"
-            : "en";
+  const handleLanguageChange = async () => {
+  try {
+    const newLanguage = language === "en" ? "te" : "en";
 
-        await changeLanguage(
-          newLanguage
-        );
+    console.log("Sending:", newLanguage);
 
-        localStorage.setItem(
-          "language",
-          newLanguage
-        );
+    await changeLanguage(newLanguage);
 
-        setLanguage(
-          newLanguage
-        );
+    setLanguage(newLanguage);
 
-        window.location.reload();
-      } catch (error) {
-        console.log(error);
-      }
-    };
+    localStorage.setItem("language", newLanguage);
+
+    alert("Language updated successfully");
+
+    window.location.reload();
+  } catch (error) {
+    console.log(error);
+  }
+};
 
   const handleNotificationToggle =
     async () => {
