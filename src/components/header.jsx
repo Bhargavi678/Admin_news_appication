@@ -68,43 +68,37 @@ export default function Header() {
   // ==========================
 
   const loadLocation = async () => {
-    try {
-      const savedLocation =
-        localStorage.getItem("user_location");
+  try {
+    const response = await axiosInstance.get("/auth/location");
 
-      if (savedLocation) {
-        setLocation(savedLocation);
-        return;
-      }
+    const data = response.data.data;
 
-      const response =
-        await axiosInstance.get(
-          "/auth/location"
-        );
+    const locationText = [
+      data.mandal,
+      data.district,
+      data.state,
+    ]
+      .filter(Boolean)
+      .join(", ");
 
-      console.log("Location:", response);
+    setLocation(locationText || "Unknown");
 
-      const data = response.data.data;
+    localStorage.setItem(
+      "user_location",
+      locationText
+    );
+  } catch (error) {
+    console.log(error);
 
-      const locationText =
-        data.city ||
-        data.district ||
-        data.state ||
-        data.country ||
-        "Unknown";
+    const savedLocation = localStorage.getItem("user_location");
 
-      setLocation(locationText);
-
-      localStorage.setItem(
-        "user_location",
-        locationText
-      );
-    } catch (error) {
-      console.log(error);
+    if (savedLocation) {
+      setLocation(savedLocation);
+    } else {
       setLocation("Unknown");
     }
-  };
-
+  }
+};
   // ==========================
   // LOAD NOTIFICATIONS
   // ==========================

@@ -32,17 +32,20 @@ export default function LocationPage() {
         return;
       }
 
-      await changeLocation({
-        state: stateName,
-        district,
-        mandal,
-      });
+      const response = await changeLocation({
+  state: stateName,
+  district,
+  mandal,
+});
 
-      alert(
-        "Location updated successfully"
-      );
+localStorage.setItem(
+  "user_location",
+  `${mandal}, ${district}, ${stateName}`
+);
 
-      router.push("/profile");
+alert("Location updated successfully");
+
+router.push("/profile");
     } catch (error) {
       console.log(error);
 
