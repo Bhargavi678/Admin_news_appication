@@ -22,33 +22,23 @@ export default function LoginPage() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      const response = await login(formData);
+  try {
+    await login(formData);
 
-      console.log("Login Response:", response);
-
-      if (response.role === "admin") {
-        router.push("/home");
-      } else if (response.role === "user") {
-        router.push("/home");
-      } else {
-        alert("Unknown role");
-      }
-    } catch (error) {
-      alert(error.message || "Invalid Email or Password");
-    }
-  };
+    router.push("/home");
+  } catch (error) {
+    alert("Invalid Email or Password");
+  }
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-100 flex items-center justify-center p-5">
       <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 border border-orange-100">
         <div className="text-center mb-8">
           <div className="w-20 h-20 mx-auto rounded-full bg-orange-500 flex items-center justify-center shadow-lg">
-            <span className="text-white text-3xl font-bold">
-              N
-            </span>
+            <span className="text-white text-3xl font-bold">N</span>
           </div>
 
           <h1 className="text-3xl font-bold text-gray-800 mt-5">
@@ -60,10 +50,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-5"
-        >
+        <form onSubmit={handleSubmit} className="space-y-5">
           <input
             type="email"
             name="email"
@@ -87,7 +74,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-2xl font-semibold transition-all duration-300"
+            className="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-2xl font-semibold"
           >
             {loading ? "Signing In..." : "Login"}
           </button>

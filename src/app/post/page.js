@@ -24,31 +24,25 @@ export default function PostPage() {
   const [categories, setCategories] =
     useState([]);
 
-  const [formData, setFormData] =
-    useState({
-      title: "",
-      content: "",
-      summary: "",
+  const [formData, setFormData] = useState({
+    title: "",
+    content: "",
+    summary: "",
+    original_language: "en",
+    category_id: "",
+    news_type: "Local",
+    country: "India",
+    state: "",
+    district: "",
+    mandal: "",
+    city: "",
+    village: "",
+    is_breaking: false,
+  });
 
-      original_language: "en",
+  const [thumbnail, setThumbnail] = useState(null);
+  const [video, setVideo] = useState(null);
 
-      category_id: "",
-
-      news_type: "Local",
-
-      country: "India",
-
-      state: "",
-      district: "",
-      mandal: "",
-      city: "",
-      village: "",
-
-      is_breaking: false,
-
-      thumbnail_url: "",
-      video_url: "",
-    });
 
   useEffect(() => {
     loadCategories();
@@ -59,6 +53,7 @@ export default function PostPage() {
     try {
       const response =
         await fetchCategories();
+
 
       setCategories(
         response.data || []
@@ -114,79 +109,81 @@ export default function PostPage() {
     }));
   };
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  try {
-    console.log(
-      "FORM DATA:",
-      formData
-    );
 
-    const createResponse =
-      await addNews(formData);
+    try {
+      const data = new FormData();
 
-    console.log(
-      "CREATE RESPONSE:",
-      createResponse
-    );
+      data.append("title", formData.title);
+      data.append("content", formData.content);
+      data.append("summary", formData.summary);
+      data.append("original_language", formData.original_language);
+      data.append("category_id", formData.category_id);
+      data.append("news_type", "Local");
+      data.append("country", formData.country);
+      data.append("state", formData.state);
+      data.append("district", formData.district);
+      data.append("mandal", formData.mandal);
+      data.append("city", formData.city);
+      data.append("village", formData.village);
+      data.append("is_breaking", formData.is_breaking);
 
-    const newsId =
-      createResponse?.data?.news_id;
+      if (thumbnail) {
+        data.append("thumbnail", thumbnail);
+      }
 
-    if (!newsId) {
-      throw new Error(
-        "News ID not found"
-      );
+      if (video) {
+        data.append("video", video);
+      }
+      console.log("===== FORM DATA =====",data);
+
+      for (const [key, value] of data.entries()) {
+        console.log(key, value);
+      }
+      const createResponse = await addNews(data);
+
+      const newsId = createResponse.data.news_id;
+
+      if (!newsId) {
+        throw new Error("News ID not found");
+      }
+
+      await publishNewsItem(newsId);
+
+      alert("News Published Successfully");
+
+      setFormData({
+        title: "",
+        content: "",
+        summary: "",
+        original_language: formData.original_language,
+        category_id: "",
+        news_type: "Local",
+        country: "India",
+        state: "",
+        district: "",
+        mandal: "",
+        city: "",
+        village: "",
+        is_breaking: false,
+      });
+
+      setThumbnail(null);
+      setVideo(null);
+    } catch (error) {
+      console.log(error.response?.data);
+
+      if (error.response?.data?.detail) {
+        error.response.data.detail.forEach((item) => {
+          console.log(item.loc, item.msg);
+        });
+      }
+      alert(error.message || "Failed to publish news");
     }
+  };
 
-    const publishResponse =
-      await publishNewsItem(
-        newsId
-      );
-
-    console.log(
-      "PUBLISH RESPONSE:",
-      publishResponse
-    );
-
-    alert(
-      "News Published Successfully"
-    );
-
-    setFormData((prev) => ({
-      ...prev,
-
-      title: "",
-      content: "",
-      summary: "",
-
-      category_id: "",
-
-      state: "",
-      district: "",
-      mandal: "",
-      city: "",
-      village: "",
-
-      is_breaking: false,
-
-      thumbnail_url: "",
-      video_url: "",
-    }));
-  } catch (error) {
-    console.log(
-      "FULL ERROR:",
-      error
-    );
-
-    alert(
-      error?.message ||
-        "Failed to publish news"
-    );
-  }
-};
-        
   return (
     <div className="p-4 pb-24">
 
@@ -255,7 +252,7 @@ export default function PostPage() {
         <input
           value={
             formData.original_language ===
-            "te"
+              "te"
               ? "Telugu"
               : "English"
           }
@@ -333,60 +330,50 @@ export default function PostPage() {
           onChange={handleChange}
           className="w-full border p-4 rounded-xl"
         />
-<div>
-  <label className="block mb-2 font-medium">
-    Upload Thumbnail
-  </label>
+        <div>
+          <label className="block mb-2 font-medium">
+            Upload Thumbnail
+          </label>
 
-  <input
-    type="file"
-    accept="image/*"
-    onChange={(e) =>
-      setFormData((prev) => ({
-        ...prev,
-        thumbnail_url: e.target.files[0],
-      }))
-    }
-    className="w-full border p-3 rounded-xl"
-  />
-</div>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setThumbnail(e.target.files[0])}
+            className="w-full border p-3 rounded-xl"
+            required
+          />
+        </div>
+        <div>
+          <label className="block mb-2 font-medium">
+            Upload Video
+          </label>
 
-<div>
-  <label className="block mb-2 font-medium">
-    Upload Video
-  </label>
+          <input
+            type="file"
+            accept="video/*"
+            onChange={(e) => setVideo(e.target.files[0])}
+            className="w-full border p-3 rounded-xl"
+          />
+        </div>
 
-  <input
-    type="file"
-    accept="video/*"
-    onChange={(e) =>
-      setFormData((prev) => ({
-        ...prev,
-        video_url: e.target.files[0],
-      }))
-    }
-    className="w-full border p-3 rounded-xl"
-  />
-</div>
+        <label className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            name="is_breaking"
+            checked={formData.is_breaking}
+            onChange={handleChange}
+          />
 
-<label className="flex items-center gap-3">
-  <input
-    type="checkbox"
-    name="is_breaking"
-    checked={formData.is_breaking}
-    onChange={handleChange}
-  />
+          Breaking News
+        </label>
 
-  Breaking News
-</label>
-
-<button
-  type="submit"
-  disabled={loading}
-  className="w-full bg-orange-500 text-white py-4 rounded-xl font-semibold"
->
-  {loading ? "Publishing..." : "Create & Publish News"}
-</button>
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-orange-500 text-white py-4 rounded-xl font-semibold"
+        >
+          {loading ? "Publishing..." : "Create & Publish News"}
+        </button>
 
       </form>
 
