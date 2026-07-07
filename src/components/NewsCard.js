@@ -265,16 +265,13 @@ const handleLike = async () => {
 
   return (
     <>
-      <div
+    <div
   className="
-    h-full
     w-full
+    h-full
     bg-white
-    overflow-hidden
     flex
     flex-col
-    rounded-none
-    shadow-none
   "
 >
 

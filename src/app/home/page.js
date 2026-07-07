@@ -53,36 +53,30 @@ export default function HomePage() {
   }
 
   return (
-    <div
-      className="
-        h-screen
-        overflow-y-scroll
-        snap-y
-        snap-mandatory
-        no-scrollbar
-        bg-gray-100
-      "
-    >
-      {news.map((item) => (
-        <section
-  key={item.news_id}
-  className="
-    snap-start
-    h-screen
-    flex
-    items-start
-    justify-center
-    pt-0
-  "
->
-  <div className="w-full max-w-md h-screen">
-    <NewsCard
-      news={item}
-      onRefresh={loadNews}
-    />
+  <div
+    className="
+      h-[calc(100vh-144px)]
+      overflow-y-auto
+      snap-y
+      snap-mandatory
+      no-scrollbar
+      bg-white
+    "
+  >
+    {news.map((item) => (
+      <section
+        key={item.news_id}
+        className="
+          snap-start
+          h-[calc(100vh-144px)]
+        "
+      >
+        <NewsCard
+          news={item}
+          onRefresh={loadNews}
+        />
+      </section>
+    ))}
   </div>
-</section>
-      ))}
-    </div>
-  );
+);
 }

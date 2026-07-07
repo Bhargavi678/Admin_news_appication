@@ -2,11 +2,14 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+
 import {
   Search,
   Bell,
   MapPin,
   X,
+  Moon,
+  Sun,
 } from "lucide-react";
 
 import { useSettings } from "@/hooks/settings_use";
@@ -25,6 +28,7 @@ export default function Header() {
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] =
     useState(false);
+  
 
   const searchRef = useRef(null);
   const notificationRef = useRef(null);

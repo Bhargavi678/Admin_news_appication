@@ -139,11 +139,11 @@ export default function AdminPostsPage() {
 
               <div className="flex items-center gap-2 mt-2 text-gray-500">
 
-                <Tag size={16} />
+                {/*<Tag size={16} />
 
                 <span>
                   Category ID : {post.category_id}
-                </span>
+                </span>*/}
 
               </div>
 

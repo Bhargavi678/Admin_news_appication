@@ -9,7 +9,6 @@ export const useAdminNews = () => {
   const fetchMyPosts = async () => {
     try {
       setLoading(true);
-
       return await getMyNews();
     } finally {
       setLoading(false);
