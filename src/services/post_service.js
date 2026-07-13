@@ -6,64 +6,35 @@ export const createNews = async (formData) => {
   try {
     const response = await axiosInstance.post(
       API_ROUTES.USER_POST.CREATE,
-      formData
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
     );
 
     return response.data;
   } catch (error) {
-    console.log(
-      "CREATE NEWS ERROR:",
-      error.response?.data
-    );
-
-    throw (
-      error.response?.data || {
-        message: "News creation failed",
-      }
-    );
+    console.log("CREATE NEWS ERROR:", error.response?.data);
+    throw error;
   }
 };
 
 // PUBLISH NEWS
 export const publishNews = async (newsId) => {
-  try {
-    const response = await axiosInstance.put(
-      API_ROUTES.USER_POST.PUBLISH(newsId)
-    );
+  const response = await axiosInstance.put(
+    API_ROUTES.USER_POST.PUBLISH(newsId)
+  );
 
-    return response.data;
-  } catch (error) {
-    console.log(
-      "PUBLISH ERROR:",
-      error.response?.data
-    );
-
-    throw (
-      error.response?.data || {
-        message: "Publish failed",
-      }
-    );
-  }
+  return response.data;
 };
 
 // MY POSTS
 export const getAdminNews = async () => {
-  try {
-    const response = await axiosInstance.get(
-      API_ROUTES.USER_POST.MY_POSTS
-    );
+  const response = await axiosInstance.get(
+    API_ROUTES.USER_POST.MY_POSTS
+  );
 
-    return response.data;
-  } catch (error) {
-    console.log(
-      "GET NEWS ERROR:",
-      error.response?.data
-    );
-
-    throw (
-      error.response?.data || {
-        message: "Failed to fetch news",
-      }
-    );
-  }
+  return response.data;
 };

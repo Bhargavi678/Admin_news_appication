@@ -26,15 +26,7 @@ export default function BottomNav() {
       icon: Grid2X2,
     },
 
-    ...(role === "admin"
-      ? [
-          {
-            name: "Post",
-            href: "/post",
-            icon: SquarePlus,
-          },
-        ]
-      : []),
+    
 
     {
       name: "Profile",

@@ -4,10 +4,7 @@ export const API_ROUTES = {
     LOCATION: "/auth/location",
   },
 
-  ADMIN_AUTH: {
-    LOGIN: "/admin/auth/login",
-    PROFILE: "/admin/auth/profile",
-  },
+  
 
   ADMIN_CATEGORIES: {
     GET_ALL: "/admin/categories/",

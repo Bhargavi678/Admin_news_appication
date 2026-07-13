@@ -18,7 +18,7 @@ export default function LayoutWrapper({ children }) {
       <main
   className={
     !isAuthPage
-      ? "pt-36 pb-20 min-h-[calc(100vh-144px)]"
+      ? "pt-36 pb-20 h-screen overflow-hidden"
       : "min-h-screen"
   }
 >

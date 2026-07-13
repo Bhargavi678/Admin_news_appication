@@ -1,15 +1,13 @@
 "use client";
 
-import Image from "next/image";
 import { useState, useEffect } from "react";
-
+import { motion } from "framer-motion";
 import {
   Heart,
   MessageCircle,
   Bookmark,
   Share2,
   Send,
-  X,
 } from "lucide-react";
 
 import { useLikes } from "@/hooks/like_use";
@@ -18,8 +16,13 @@ import { useComments } from "@/hooks/comment_use";
 import { useNews } from "@/hooks/news_use";
 
 export default function NewsCard({ news }) {
-  const { addLike, removeLike } =
-    useLikes();
+  if (!news) return null;
+
+  // ==========================
+  // HOOKS
+  // ==========================
+
+  const { addLike, removeLike } = useLikes();
 
   const {
     saveBookmark,
@@ -31,176 +34,206 @@ export default function NewsCard({ news }) {
     fetchComments,
   } = useComments();
 
-  const { sharePost } =
-  useNews();
+  const { sharePost } = useNews();
 
-const [shares, setShares] = useState(
-  news.share_count || 0
-);
+  // ==========================
+  // STATES
+  // ==========================
 
-const [likes, setLikes] = useState(
-  news.like_count || 0
-);
-
-const [liked, setLiked] = useState(
-  news.is_liked || false
-);
-
-const [bookmarked, setBookmarked] =
-  useState(
-    news.is_bookmarked || false
+  const [likes, setLikes] = useState(
+    news.like_count || 0
   );
 
-const [showComments, setShowComments] =
-  useState(false);
+  const [shares, setShares] = useState(
+    news.share_count || 0
+  );
 
-const [comments, setComments] =
-  useState([]);
+  const [liked, setLiked] = useState(
+    news.is_liked || false
+  );
 
+  const [bookmarked, setBookmarked] =
+    useState(
+      news.is_bookmarked || false
+    );
 
-const [commentText, setCommentText] =
-  useState("");
+  const [showComments, setShowComments] =
+    useState(false);
 
+  const [comments, setComments] =
+    useState([]);
+
+  const [commentText, setCommentText] =
+    useState("");
+
+  const [expanded, setExpanded] =
+    useState(false);
+
+  // ==========================
+  // EFFECT
+  // ==========================
 
   useEffect(() => {
-  setLikes(news.like_count || 0);
-  setShares(news.share_count || 0);
+    if (!news) return;
 
-  const likedPosts = JSON.parse(
-    localStorage.getItem("likedPosts") || "[]"
-  );
+    setLikes(news.like_count || 0);
+    setShares(news.share_count || 0);
 
-  setLiked(
-    likedPosts.includes(news.news_id) ||
-    news.is_liked
-  );
+    const likedPosts = JSON.parse(
+      localStorage.getItem("likedPosts") ||
+        "[]"
+    );
 
-   const bookmarkedPosts = JSON.parse(
-    localStorage.getItem("bookmarkedPosts") || "[]"
-  );
+    const bookmarkedPosts = JSON.parse(
+      localStorage.getItem(
+        "bookmarkedPosts"
+      ) || "[]"
+    );
 
-  setBookmarked(
-    bookmarkedPosts.includes(news.news_id) ||
-    news.is_bookmarked
-  );
-}, [news]);
-  // ====================
+    setLiked(
+      likedPosts.includes(news.news_id) ||
+        news.is_liked
+    );
+
+    setBookmarked(
+      bookmarkedPosts.includes(
+        news.news_id
+      ) || news.is_bookmarked
+    );
+  }, [news]);
+
+  // ==========================
   // LIKE
-  // ====================
+  // ==========================
 
-const handleLike = async () => {
-  try {
-    let likedPosts = JSON.parse(
-      localStorage.getItem("likedPosts") || "[]"
-    );
-
-    if (liked) {
-      await removeLike(news.news_id);
-
-      likedPosts = likedPosts.filter(
-        (id) => id !== news.news_id
+  const handleLike = async () => {
+    try {
+      let likedPosts = JSON.parse(
+        localStorage.getItem(
+          "likedPosts"
+        ) || "[]"
       );
 
-      localStorage.setItem(
-        "likedPosts",
-        JSON.stringify(likedPosts)
-      );
+      if (liked) {
+        await removeLike(news.news_id);
 
-      setLiked(false);
+        likedPosts = likedPosts.filter(
+          (id) => id !== news.news_id
+        );
 
-      setLikes((prev) =>
-        prev > 0 ? prev - 1 : 0
-      );
-    } else {
-      await addLike(news.news_id);
+        localStorage.setItem(
+          "likedPosts",
+          JSON.stringify(likedPosts)
+        );
 
-      likedPosts.push(news.news_id);
+        setLiked(false);
 
-      localStorage.setItem(
-        "likedPosts",
-        JSON.stringify(likedPosts)
-      );
+        setLikes((prev) =>
+          prev > 0 ? prev - 1 : 0
+        );
+      } else {
+        await addLike(news.news_id);
 
-      setLiked(true);
+        likedPosts.push(news.news_id);
 
-      setLikes((prev) => prev + 1);
+        localStorage.setItem(
+          "likedPosts",
+          JSON.stringify(likedPosts)
+        );
+
+        setLiked(true);
+
+        setLikes((prev) => prev + 1);
+      }
+    } catch (err) {
+      console.log(err);
     }
-  } catch (error) {
-    console.log(error);
-  }
-};
+  };
 
-  // ====================
+  // ==========================
   // BOOKMARK
-  // ====================
+  // ==========================
 
- const handleBookmark = async () => {
-  try {
-    let bookmarkedPosts = JSON.parse(
-      localStorage.getItem("bookmarkedPosts") || "[]"
-    );
+  const handleBookmark = async () => {
+    try {
+      let bookmarkedPosts =
+        JSON.parse(
+          localStorage.getItem(
+            "bookmarkedPosts"
+          ) || "[]"
+        );
 
-    if (bookmarked) {
-      await deleteBookmark(news.news_id);
+      if (bookmarked) {
+        await deleteBookmark(
+          news.news_id
+        );
 
-      bookmarkedPosts = bookmarkedPosts.filter(
-        (id) => id !== news.news_id
-      );
+        bookmarkedPosts =
+          bookmarkedPosts.filter(
+            (id) =>
+              id !== news.news_id
+          );
 
-      localStorage.setItem(
-        "bookmarkedPosts",
-        JSON.stringify(bookmarkedPosts)
-      );
+        localStorage.setItem(
+          "bookmarkedPosts",
+          JSON.stringify(
+            bookmarkedPosts
+          )
+        );
 
-      setBookmarked(false);
-    } else {
-      await saveBookmark(news.news_id);
+        setBookmarked(false);
+      } else {
+        await saveBookmark(
+          news.news_id
+        );
 
-      bookmarkedPosts.push(news.news_id);
+        bookmarkedPosts.push(
+          news.news_id
+        );
 
-      localStorage.setItem(
-        "bookmarkedPosts",
-        JSON.stringify(bookmarkedPosts)
-      );
+        localStorage.setItem(
+          "bookmarkedPosts",
+          JSON.stringify(
+            bookmarkedPosts
+          )
+        );
 
-      setBookmarked(true);
+        setBookmarked(true);
+      }
+    } catch (err) {
+      console.log(err);
     }
-  } catch (error) {
-    console.log(error);
-  }
-};
+  };
 
-  // ====================
+  // ==========================
   // COMMENTS
-  // ====================
+  // ==========================
 
   const openComments = async () => {
-  try {
-    if (showComments) {
-      setShowComments(false);
-      return;
-    }
+    try {
+      if (showComments) {
+        setShowComments(false);
+        return;
+      }
 
-    const response =
-      await fetchComments(
-        news.news_id
+      const response =
+        await fetchComments(
+          news.news_id
+        );
+
+      setComments(
+        response.data || []
       );
 
-    setComments(
-      response.data || []
-    );
-
-    setShowComments(true);
-  } catch (error) {
-    console.log(error);
-  }
-};
+      setShowComments(true);
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   const handleComment =
     async () => {
-      if (
-        !commentText.trim()
-      )
+      if (!commentText.trim())
         return;
 
       try {
@@ -219,263 +252,296 @@ const handleLike = async () => {
         setComments(
           response.data || []
         );
-      } catch (error) {
-        console.log(error);
+      } catch (err) {
+        console.log(err);
       }
     };
 
-  // ====================
+  // ==========================
   // SHARE
-  // ====================
+  // ==========================
 
- const handleShare = async () => {
-  try {
-    // Call backend to update share count
-    const response = await sharePost(news.news_id);
+  const handleShare = async () => {
+    try {
+      const response =
+        await sharePost(news.news_id);
 
-    console.log("Share API Response:", response);
+      if (!response.success)
+        return;
 
-    if (!response.success) {
-      return;
+      setShares(
+        response.data.share_count
+      );
+
+      const shareUrl =
+        response.data.share_url;
+
+      if (navigator.share) {
+        await navigator.share({
+          title:
+            response.data.title,
+          text:
+            response.data.summary,
+          url: shareUrl,
+        });
+      } else {
+        await navigator.clipboard.writeText(
+          shareUrl
+        );
+
+        alert(
+          "Share link copied successfully!"
+        );
+      }
+    } catch (err) {
+      console.log(err);
     }
-
-    // Update share count
-    setShares(response.data.share_count);
-
-    const shareUrl = response.data.share_url;
-    const title = response.data.title;
-    const summary = response.data.summary;
-
-    // Open native share dialog
-    if (navigator.share) {
-      await navigator.share({
-        title: title,
-        text: summary,
-        url: shareUrl,
-      });
-    } else {
-      // Fallback: copy link
-      await navigator.clipboard.writeText(shareUrl);
-      alert("Share link copied successfully!");
-    }
-  } catch (error) {
-    console.log(error);
-  }
-};
-
+  };
   return (
-    <>
-    <div
-  className="
-    w-full
-    h-full
-    bg-white
-    flex
-    flex-col
-  "
->
+  <>
+    <motion.div
+  className="w-full h-full bg-white flex flex-col justify-between"
+      initial={{
+        rotateX: -90,
+        opacity: 0,
+      }}
+      animate={{
+        rotateX: 0,
+        opacity: 1,
+      }}
+      transition={{
+        duration: 0.6,
+      }}
+    >
+      {/* IMAGE */}
 
-        {/* IMAGE */}
-
-        <div className="relative h-64 md:h-72 w-full">
-
+      <div className="relative h-[30%] w-full overflow-hidden rounded-b-2xl">
         <img
-  src={news.thumbnail_url}
-  alt={news.title}
-  className="w-full h-full object-cover"
-/>
+          src={news.thumbnail_url}
+          alt={news.title}
+          className="w-full h-full object-cover"
+        />
 
-          <div className="absolute top-3 left-3">
+        <div className="absolute top-3 left-3">
+          <span className="bg-orange-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
+            {news.news_type}
+          </span>
+        </div>
+      </div>
 
-            <span className="bg-orange-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
+      {/* CONTENT */}
 
-              {news.news_type}
+      <div className="flex-1 flex flex-col justify-between px-4 py-3">
 
-            </span>
+        {/* TITLE */}
 
-          </div>
+
+        <h2 className="text-xl font-bold text-gray-900 leading-snug line-clamp-2 h-[52px]">
+          {news.title}
+        </h2>
+
+        {/* SUMMARY */}
+
+        <div className="mt-2 h-[72px] overflow-hidden">
+
+          <p
+            className={`text-gray-600 leading-6 text-[15px] ${
+              expanded ? "" : "line-clamp-3"
+            }`}
+          >
+            {news.summary}
+          </p>
+
+          {news.summary?.length > 180 && (
+            <button
+              onClick={() =>
+                setExpanded(!expanded)
+              }
+              className="text-orange-500 font-medium text-sm mt-1"
+            >
+              {expanded
+                ? "Show Less"
+                : "Read More"}
+            </button>
+          )}
 
         </div>
 
-        {/* CONTENT */}
-        <div className="flex flex-col px-4 py-3">
-        
+        {/* LOCATION */}
 
-          <h2 className="text-2xl font-bold text-gray-900 leading-snug line-clamp-3">
-            {news.title}
+        <div className="flex items-center justify-between mt-2">
 
-          </h2>
-
-          <p className="text-gray-600 mt-3 text-base leading-7">
-  {news.summary}
-</p>
-
-          <p className="text-sm text-gray-500 mt-3">
-
-             {news.city},
-            {" "}
+          <p className="text-sm text-gray-500">
+             {news.city},{" "}
             {news.state}
-
           </p>
 
-          {/* ACTIONS */}
+          <p className="text-xs text-gray-400">
+            {news.published_at}
+          </p>
 
-          <div className="flex justify-between items-center mt-4 pt-3 border-t">
+        </div>
 
-            <div className="flex gap-5">
+        {/* ACTION BAR */}
 
-              {/* LIKE */}
+{/* ACTION BAR */}
 
-              
-               <button
-  onClick={handleLike}
-  className="flex items-center gap-1"
->
-  <Heart
-  size={22}
-  fill={liked ? "#ef4444" : "none"}
-  className={
-    liked
-      ? "text-red-500"
-      : "text-gray-500"
-  }
-/>
-  <span>{likes}</span>
-</button>
+<div className=" pt-3 mt-3">
 
-              {/* COMMENT */}
+  <div className="flex justify-between items-center">
 
-              <button
-                onClick={
-                  openComments
-                }
-                className="flex items-center gap-1"
-              >
+    <div className="flex items-center gap-4">
 
-                <MessageCircle
-                  size={22}
-                  className="text-blue-500"
-                />
+      <button
+        onClick={handleLike}
+        className="flex items-center gap-1"
+      >
+        <Heart
+          size={20}
+          fill={liked ? "#ef4444" : "none"}
+          className={
+            liked
+              ? "text-red-500"
+              : "text-gray-500"
+          }
+        />
+        <span className="text-sm">{likes}</span>
+      </button>
 
-                <span>
-                  {
-                    news.comment_count
-                  }
-                </span>
-
-              </button>
-
-            </div>
-
-            <div className="flex gap-5">
-
-              {/* BOOKMARK */}
-
-             {/* BOOKMARK */}
-
-<button onClick={handleBookmark}>
-  <Bookmark
-    size={22}
-    fill={bookmarked ? "#f97316" : "none"}
-    className={
-      bookmarked
-        ? "text-orange-500"
-        : "text-gray-500"
-    }
-  />
-</button>
-
-              {/* SHARE */}
-
-              <button
-  onClick={handleShare}
-  className="flex items-center gap-1"
->
-  <Share2
-    size={22}
-  />
-
-  <span>
-    {shares}
-  </span>
-</button>
-
-               
-
-            </div>
-
-          </div>
-
-         <p className="text-xs text-gray-400 mt-3">
-  {news.published_at}
-</p>
-
-{/* COMMENTS INSIDE CARD */}
-
-{showComments && (
-  <div className="mt-3 border-t pt-3">
-
-    <h3 className="font-semibold text-sm mb-3">
-      Comments
-    </h3>
-
-    {/* ONLY 2 COMMENTS VISIBLE */}
-    <div className="max-h-36 overflow-y-auto no-scrollbar space-y-2">
-
-      {comments.length === 0 ? (
-        <p className="text-gray-500 text-sm">
-          No comments yet
-        </p>
-      ) : (
-        comments.map((comment) => (
-          <div
-            key={comment.comment_id}
-            className="bg-gray-100 rounded-xl p-2"
-          >
-            <p className="font-semibold text-xs">
-              {comment.user_name}
-            </p>
-
-            <p className="text-xs text-gray-700 mt-1">
-              {comment.content}
-            </p>
-          </div>
-        ))
-      )}
+      <button
+        onClick={openComments}
+        className="flex items-center gap-1"
+      >
+        <MessageCircle
+          size={20}
+          className="text-blue-500"
+        />
+        <span className="text-sm">
+          {news.comment_count}
+        </span>
+      </button>
 
     </div>
 
-    {/* COMMENT INPUT */}
+    <div className="flex items-center gap-4">
 
-    <div className="flex items-center gap-2 mt-3">
-
-      <input
-        type="text"
-        placeholder="Write a comment..."
-        value={commentText}
-        onChange={(e) =>
-          setCommentText(e.target.value)
-        }
-        className="flex-1 border rounded-full px-4 py-2 text-sm"
-      />
+      <button onClick={handleBookmark}>
+        <Bookmark
+          size={20}
+          fill={
+            bookmarked ? "#f97316" : "none"
+          }
+          className={
+            bookmarked
+              ? "text-orange-500"
+              : "text-gray-500"
+          }
+        />
+      </button>
 
       <button
-        onClick={handleComment}
-        className="bg-orange-500 text-white p-2 rounded-full"
+        onClick={handleShare}
+        className="flex items-center gap-1"
       >
-        <Send size={18} />
+        <Share2 size={20} />
+        <span className="text-sm">
+          {shares}
+        </span>
       </button>
 
     </div>
 
   </div>
-)}
 
-        </div>
+</div>
+                {/* COMMENTS */}
+
+        {showComments && (
+          <div className="mt-3 border-t pt-3">
+
+            <h3 className="font-semibold text-sm mb-3">
+              Comments
+            </h3>
+
+            <div className="max-h-40 overflow-y-auto no-scrollbar space-y-2">
+
+              {comments.length === 0 ? (
+
+                <p className="text-sm text-gray-500">
+                  No comments yet
+                </p>
+
+              ) : (
+
+                comments.map((comment) => (
+
+                  <div
+                    key={comment.comment_id}
+                    className="bg-gray-100 rounded-xl p-3"
+                  >
+
+                    <p className="font-semibold text-xs">
+                      {comment.user_name}
+                    </p>
+
+                    <p className="text-sm text-gray-700 mt-1">
+                      {comment.content}
+                    </p>
+
+                  </div>
+
+                ))
+
+              )}
+
+            </div>
+
+            <div className="flex items-center gap-2 mt-3">
+
+              <input
+                type="text"
+                value={commentText}
+                placeholder="Write a comment..."
+                onChange={(e) =>
+                  setCommentText(e.target.value)
+                }
+                className="
+                  flex-1
+                  border
+                  rounded-full
+                  px-4
+                  py-2
+                  text-sm
+                  outline-none
+                  focus:border-orange-500
+                "
+              />
+
+              <button
+                onClick={handleComment}
+                className="
+                  h-10
+                  w-10
+                  rounded-full
+                  bg-orange-500
+                  text-white
+                  flex
+                  items-center
+                  justify-center
+                "
+              >
+                <Send size={18} />
+              </button>
+
+            </div>
+
+          </div>
+        )}
 
       </div>
 
-     
-         </>
-  );
+    </motion.div>
+
+  </>
+);
 }

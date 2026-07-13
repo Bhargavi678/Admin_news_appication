@@ -44,11 +44,11 @@ const fetchMyPosts = async () => {
   // GET NEWS DETAILS
   // ======================
 
-  const fetchNewsDetails = async (newsId) => {
+  const fetchNewsDetails = async (id) => {
     try {
       setLoading(true);
 
-      const response = await getNewsById(newsId);
+      const response = await getNewsById(id);
 
       return response;
     } finally {

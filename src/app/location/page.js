@@ -19,49 +19,65 @@ export default function LocationPage() {
   const [mandal, setMandal] =
     useState("");
 
+    const [message, setMessage] = useState("");
+const [error, setError] = useState("");
+
+
   const handleSave = async () => {
-    try {
-      if (
-        !stateName.trim() ||
-        !district.trim() ||
-        !mandal.trim()
-      ) {
-        alert(
-          "Please enter State, District and Mandal"
-        );
-        return;
-      }
+  if (
+    !stateName.trim() ||
+    !district.trim() ||
+    !mandal.trim()
+  ) {
+    setError("Please enter State, District and Mandal");
+    setMessage("");
+    return;
+  }
 
-      const response = await changeLocation({
-  state: stateName,
-  district,
-  mandal,
-});
+  try {
+    await changeLocation({
+      state: stateName,
+      district,
+      mandal,
+    });
 
-localStorage.setItem(
-  "user_location",
-  `${mandal}, ${district}, ${stateName}`
-);
+    const location = `${mandal}, ${district}, ${stateName}`;
 
-alert("Location updated successfully");
+    localStorage.setItem("user_location", location);
+    localStorage.setItem("updated_location", location);
 
-router.push("/profile");
-    } catch (error) {
-      console.log(error);
+    setMessage("Location updated successfully");
+    setError("");
 
-      alert(
-        error?.message ||
-          "Location update failed"
-      );
-    }
-  };
+    setTimeout(() => {
+      router.push("/profile");
+    }, 1500);
+  } catch (err) {
+    console.log(err);
+
+    setError(
+      err?.message || "Location update failed"
+    );
+    setMessage("");
+  }
+};
 
   return (
     <div className="px-4 py-4 pb-24">
       <h1 className="text-3xl font-bold mb-6">
         Update Location
       </h1>
+{message && (
+  <div className="mb-4 rounded-xl border border-green-300 bg-green-100 px-4 py-3 text-green-700">
+    {message}
+  </div>
+)}
 
+{error && (
+  <div className="mb-4 rounded-xl border border-red-300 bg-red-100 px-4 py-3 text-red-700">
+    {error}
+  </div>
+)}
       <div className="bg-white rounded-3xl shadow p-5">
 
         {/* STATE */}

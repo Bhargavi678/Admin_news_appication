@@ -43,6 +43,9 @@ export default function PostPage() {
   const [thumbnail, setThumbnail] = useState(null);
   const [video, setVideo] = useState(null);
 
+  const [message, setMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
 
   useEffect(() => {
     loadCategories();
@@ -110,80 +113,90 @@ export default function PostPage() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
+  setMessage("");
+  setErrorMessage("");
 
-    try {
-      const data = new FormData();
+  try {
+    const data = new FormData();
 
-      data.append("title", formData.title);
-      data.append("content", formData.content);
-      data.append("summary", formData.summary);
-      data.append("original_language", formData.original_language);
-      data.append("category_id", formData.category_id);
-      data.append("news_type", "Local");
-      data.append("country", formData.country);
-      data.append("state", formData.state);
-      data.append("district", formData.district);
-      data.append("mandal", formData.mandal);
-      data.append("city", formData.city);
-      data.append("village", formData.village);
-      data.append("is_breaking", formData.is_breaking);
+    data.append("title", formData.title);
+    data.append("content", formData.content);
+    data.append("summary", formData.summary);
+    data.append(
+      "original_language",
+      formData.original_language
+    );
+    data.append("category_id", formData.category_id);
+    data.append("news_type", formData.news_type);
+    data.append("country", formData.country);
+    data.append("state", formData.state);
+    data.append("district", formData.district);
+    data.append("mandal", formData.mandal);
+    data.append("city", formData.city);
+    data.append("village", formData.village);
+    data.append("is_breaking", formData.is_breaking);
 
-      if (thumbnail) {
-        data.append("thumbnail", thumbnail);
-      }
-
-      if (video) {
-        data.append("video", video);
-      }
-      console.log("===== FORM DATA =====",data);
-
-      for (const [key, value] of data.entries()) {
-        console.log(key, value);
-      }
-      const createResponse = await addNews(data);
-
-      const newsId = createResponse.data.news_id;
-
-      if (!newsId) {
-        throw new Error("News ID not found");
-      }
-
-      await publishNewsItem(newsId);
-
-      alert("News Published Successfully");
-
-      setFormData({
-        title: "",
-        content: "",
-        summary: "",
-        original_language: formData.original_language,
-        category_id: "",
-        news_type: "Local",
-        country: "India",
-        state: "",
-        district: "",
-        mandal: "",
-        city: "",
-        village: "",
-        is_breaking: false,
-      });
-
-      setThumbnail(null);
-      setVideo(null);
-    } catch (error) {
-      console.log(error.response?.data);
-
-      if (error.response?.data?.detail) {
-        error.response.data.detail.forEach((item) => {
-          console.log(item.loc, item.msg);
-        });
-      }
-      alert(error.message || "Failed to publish news");
+    if (thumbnail) {
+      data.append("thumbnail", thumbnail);
     }
-  };
 
+    if (video) {
+      data.append("video", video);
+    }
+
+    const createResponse = await addNews(data);
+
+    const newsId = createResponse.data.news_id;
+
+    if (!newsId) {
+      throw new Error("News ID not found");
+    }
+
+    await publishNewsItem(newsId);
+
+    setMessage("News published successfully");
+    setErrorMessage("");
+
+    setFormData({
+      title: "",
+      content: "",
+      summary: "",
+      original_language: formData.original_language,
+      category_id: "",
+      news_type: "Local",
+      country: "India",
+      state: "",
+      district: "",
+      mandal: "",
+      city: "",
+      village: "",
+      is_breaking: false,
+    });
+
+    setThumbnail(null);
+    setVideo(null);
+  } catch (error) {
+    console.log(error);
+
+    if (error.response?.data?.detail) {
+      setErrorMessage(
+        Array.isArray(error.response.data.detail)
+          ? error.response.data.detail
+              .map((item) => item.msg)
+              .join(", ")
+          : error.response.data.detail
+      );
+    } else {
+      setErrorMessage(
+        error.message || "Failed to publish news"
+      );
+    }
+
+    setMessage("");
+  }
+};
   return (
     <div className="p-4 pb-24">
 
@@ -195,6 +208,18 @@ export default function PostPage() {
         onSubmit={handleSubmit}
         className="space-y-4"
       >
+
+      {message && (
+  <div className="mb-4 rounded-xl border border-green-300 bg-green-100 px-4 py-3 text-green-700">
+    {message}
+  </div>
+)}
+
+{errorMessage && (
+  <div className="mb-4 rounded-xl border border-red-300 bg-red-100 px-4 py-3 text-red-700">
+    {errorMessage}
+  </div>
+)}
         <input
           name="title"
           placeholder="News Title"

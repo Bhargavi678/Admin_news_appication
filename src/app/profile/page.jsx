@@ -52,6 +52,9 @@ export default function ProfilePage() {
     loadProfile();
   }, []);
 
+  const [message, setMessage] = useState("");
+const [error, setError] = useState("");
+
   const loadProfile = async () => {
     try {
       const userRole =
@@ -92,42 +95,46 @@ export default function ProfilePage() {
   try {
     const newLanguage = language === "en" ? "te" : "en";
 
-    console.log("Sending:", newLanguage);
-
     await changeLanguage(newLanguage);
 
     setLanguage(newLanguage);
-
     localStorage.setItem("language", newLanguage);
 
-    alert("Language updated successfully");
+    setMessage("Language updated successfully");
+    setError("");
 
-    window.location.reload();
-  } catch (error) {
-    console.log(error);
+    setTimeout(() => {
+      setMessage("");
+      window.location.reload();
+    }, 1500);
+  } catch (err) {
+    setError("Failed to update language");
+    setMessage("");
   }
 };
 
-  const handleNotificationToggle =
-    async () => {
-      try {
-        await toggleNotifications(
-          !notifications
-        );
+  const handleNotificationToggle = async () => {
+  try {
+    await toggleNotifications(!notifications);
 
-        setNotifications(
-          !notifications
-        );
+    setNotifications(!notifications);
 
-        alert(
-          !notifications
-            ? "Notifications Enabled"
-            : "Notifications Disabled"
-        );
-      } catch (error) {
-        console.log(error);
-      }
-    };
+    setMessage(
+      !notifications
+        ? "Notifications Enabled"
+        : "Notifications Disabled"
+    );
+
+    setError("");
+
+    setTimeout(() => {
+      setMessage("");
+    }, 2000);
+  } catch (err) {
+    setError("Failed to update notification settings");
+    setMessage("");
+  }
+};
 
   const logout = () => {
     localStorage.clear();
@@ -180,6 +187,17 @@ export default function ProfilePage() {
         </div>
 
       </div>
+      {message && (
+  <div className="mt-4 rounded-lg bg-green-100 border border-green-400 text-green-700 px-4 py-3">
+    {message}
+  </div>
+)}
+
+{error && (
+  <div className="mt-4 rounded-lg bg-red-100 border border-red-400 text-red-700 px-4 py-3">
+    {error}
+  </div>
+)}
 
       {/* SETTINGS */}
 

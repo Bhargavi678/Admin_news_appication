@@ -73,34 +73,79 @@ export default function Header() {
 
   const loadLocation = async () => {
   try {
-    const response = await axiosInstance.get("/auth/location");
+    // 1. Check if user has manually updated location
+    const updatedLocation = localStorage.getItem("updated_location");
 
-    const data = response.data.data;
+    if (updatedLocation) {
+      setLocation(updatedLocation);
+      return;
+    }
 
-    const locationText = [
-      data.mandal,
-      data.district,
-      data.state,
-    ]
-      .filter(Boolean)
-      .join(", ");
+    // 2. Otherwise get current GPS location
+    if (!navigator.geolocation) {
+      setLocation("Unknown");
+      return;
+    }
 
-    setLocation(locationText || "Unknown");
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
 
-    localStorage.setItem(
-      "user_location",
-      locationText
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`
+          );
+
+          const data = await response.json();
+
+          const address = data.address;
+
+const villageOrArea =
+  address.village ||
+  address.hamlet ||
+  address.suburb ||
+  address.neighbourhood ||
+  address.quarter ||
+  address.city_district ||
+  "";
+
+const city =
+  address.city ||
+  address.town ||
+  address.municipality ||
+  "";
+
+const state =
+  address.state || "";
+
+const currentLocation = [
+  villageOrArea,
+  city,
+  state,
+]
+  .filter(Boolean)
+  .join(", ");
+
+          setLocation(currentLocation || "Unknown");
+
+          localStorage.setItem(
+            "current_location",
+            currentLocation
+          );
+        } catch (error) {
+          console.log(error);
+          setLocation("Unknown");
+        }
+      },
+      (error) => {
+        console.log(error);
+        setLocation("Unknown");
+      }
     );
   } catch (error) {
     console.log(error);
-
-    const savedLocation = localStorage.getItem("user_location");
-
-    if (savedLocation) {
-      setLocation(savedLocation);
-    } else {
-      setLocation("Unknown");
-    }
+    setLocation("Unknown");
   }
 };
   // ==========================
